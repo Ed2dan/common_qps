@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/DBConnect"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/averylib"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Servlet"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Apache Axis"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Apache Commons Lang"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PaxarSoap"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Oracle JDBC"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Java Mail"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JExcel API"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Apache Commons Codec"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Apache Commons Net"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Xerces XML"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
