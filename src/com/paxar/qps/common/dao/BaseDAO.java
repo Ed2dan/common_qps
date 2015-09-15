@@ -1,6 +1,11 @@
 package com.paxar.qps.common.dao;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
@@ -101,6 +106,60 @@ public abstract class BaseDAO extends AbstractDAO {
     protected String escape(String sql) {
         Validate.notNull(sql);
         return AbstractDAO.esc(sql);
+    }
+    
+
+    /**
+     * Executes sql script and returns map with given column key-values.
+     * 
+     * @param sql
+     *            script to execute
+     * @param columnName1
+     *            key of the map entry
+     * @param columnName2
+     *            value of the map entry                              
+     * @return
+     * @throws DatabaseException
+     */
+    protected Map<String, String> executeToStringMap(String sql, String columnName1, String columnName2) throws DatabaseException {
+        Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");        
+        Validate.notEmpty(columnName1, "[columnName1] parameter cannot be null or empty");
+        Validate.notEmpty(columnName2, "[columnName2] parameter cannot be null or empty");
+
+        try (ResultSet rs = execute(sql)) {
+            Map<String, String> result = new HashMap<>();
+            while (rs.next()) {
+                result.put(rs.getString(columnName1), rs.getString(columnName2));
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+    
+    /**
+     * Executes sql script and returns given column values.
+     * 
+     * @param sql
+     *            script to execute
+     * @param columnName
+     *            column to return
+     * @return
+     * @throws DatabaseException
+     */
+    protected List<String> executeToStringList(String sql, String columnName) throws DatabaseException {
+        Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");        
+        Validate.notEmpty(columnName, "[columnName] parameter cannot be null or empty");
+
+        try (ResultSet rs = execute(sql)) {
+            List<String> result = new ArrayList<>();
+            while (rs.next()) {
+                result.add(rs.getString(columnName));
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
     }
 
 }
