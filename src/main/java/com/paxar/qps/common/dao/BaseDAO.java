@@ -4,8 +4,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
@@ -106,6 +108,26 @@ public abstract class BaseDAO extends AbstractDAO {
     protected String escape(String sql) {
         Validate.notNull(sql);
         return AbstractDAO.esc(sql);
+    }
+    
+    /**
+     * Performs {@link #escape(String)} method on each value of specified set and returns new set withb escaped values.
+     * @param values set with values that should be escaped
+     * @return new {@link HashSet} instance with escaped values from original set 
+     * @throws IllegalArgumentException if specified set is null, is empty or contains null elements
+     */
+    protected Set<String> escapeSet(Set<String> values) {
+        Validate.notNull(values);
+        Validate.notEmpty(values);
+        Validate.noNullElements(values);
+        
+        final Set<String> result = new HashSet<>();
+        
+        for (String value : values) {
+            result.add(escape(value));
+        }
+        
+        return result;
     }
     
 

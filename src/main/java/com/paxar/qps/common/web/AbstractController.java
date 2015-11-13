@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.paxar.qps.common.config.D2CommProperties;
+
 /**
  * <p>Provides abstraction for those classes that will be used as Controllers for some RBO batch builders.</p>
  * <p>The following logic is used for handling requests:</p>
@@ -100,7 +102,9 @@ public abstract class AbstractController extends HttpServlet {
     /**
      * Extracts server base init parameter from servlet contex.
      * @return
+     * @deprecated user {@link D2CommProperties#DB_HOST} property.
      */
+    @Deprecated
     protected final String getServerBaseInitParam() {
         return getServletContext().getInitParameter(QPSWebUtils.SERVER_BASE_INIT_PARAM);
     }
@@ -108,7 +112,9 @@ public abstract class AbstractController extends HttpServlet {
     /**
      * Extracts DB host init parameter from servlet contex.
      * @return
+     * @deprecated user {@link D2CommProperties#DB_HOST} property.
      */
+    @Deprecated
     protected final String getDBHostInitParam() {
         return getServletContext().getInitParameter(QPSWebUtils.DB_HOST_INIT_PARAM);
     }
@@ -116,7 +122,9 @@ public abstract class AbstractController extends HttpServlet {
     /**
      * Extracts SMTP host init parameter from servlet contex.
      * @return
+     * @deprecated user {@link D2CommProperties#DB_HOST} property.
      */
+    @Deprecated
     protected final String getSMTPHostInitParam() {
         return getServletContext().getInitParameter(QPSWebUtils.SMTP_HOST_INIT_PARAM);
     }
