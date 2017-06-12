@@ -1,16 +1,14 @@
 package com.paxar.qps.common.web;
 
-import java.io.IOException;
+import com.paxar.qps.common.config.D2CommProperties;
+import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.log4j.Logger;
-
-import com.paxar.qps.common.config.D2CommProperties;
+import java.io.IOException;
 
 /**
  * <p>Provides abstraction for those classes that will be used as Controllers for some RBO batch builders.</p>
@@ -80,6 +78,13 @@ public abstract class AbstractController extends HttpServlet {
      *  If found - uses it to process request, otherwise - 
      *  calls {@link #onRequestHandlerNotFoundException(HttpServletRequest, HttpServletResponse, RequestHandlerNotFoundException)} method.
      * </p>
+     * <p>It also calls set of methods before and after each action. Below is this list</p>
+     * <ul>
+     *     <li>{@link #preProcess(HttpServletRequest, HttpServletResponse)}</li>
+     *     <li>{@link #preValidation(HttpServletRequest, HttpServletResponse)}</li>
+     *     <li>{@link #postValidation(HttpServletRequest, HttpServletResponse)}</li>
+     *     <li>{@link #postProcess(HttpServletRequest, HttpServletResponse)}</li>
+     * </ul>
      * @param request
      * @param response
      * @throws ServletException if some ServletException occurred during working with or response arguments
@@ -87,8 +92,17 @@ public abstract class AbstractController extends HttpServlet {
      */
     protected void doGetPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (!preProcess(request, response)) {
+            return;
+        }
         try {
+            if (!preValidation(request, response)) {
+                return;
+            }
             QPSWebUtils.validateSession(request);
+            if (!postValidation(request, response)) {
+                return;
+            }
             this.requestHandlerFactory.getRequestHandler(request).handle(request, response);
         } catch (InvalidSessionException e) {
             getLogger().error("Failed to process request due to invalid session", e);
@@ -97,6 +111,45 @@ public abstract class AbstractController extends HttpServlet {
             getLogger().error("Failed to found request handler to process request", e);
             onRequestHandlerNotFoundException(request, response, e);
         }
+        postProcess(request, response);
+    }
+
+    /**
+     * This method will be executed before each request processing (Also before validation)..
+     * @param request
+     * @param response
+     * @return indicator if abstract controller should continue processing request. Default is true
+     */
+    protected boolean preProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        return true;
+    }
+
+    /**
+     * This method will be executed after each request processing.
+     * @param request
+     * @param response
+     * @return indicator if abstract controller should continue processing request. Default is true
+     */
+    protected void postProcess(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {}
+
+    /**
+     * This method will be executed before each request validation action.
+     * @param request
+     * @param response
+     * @return indicator if abstract controller should continue processing request. Default is true
+     */
+    protected boolean preValidation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        return true;
+    }
+
+    /**
+     * This method will be executed before each request validation action.
+     * @param request
+     * @param response
+     * @return indicator if abstract controller should continue processing request. Default is true
+     */
+    protected boolean postValidation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        return true;
     }
     
     /**
