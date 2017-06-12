@@ -92,6 +92,7 @@ public abstract class AbstractController extends HttpServlet {
      */
     protected void doGetPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        setNoCahce(response);
         if (!preProcess(request, response)) {
             return;
         }
@@ -112,6 +113,13 @@ public abstract class AbstractController extends HttpServlet {
             onRequestHandlerNotFoundException(request, response, e);
         }
         postProcess(request, response);
+    }
+    
+    private void setNoCahce(HttpServletResponse response) {
+        response.setHeader("X-UA-Compatible","IE=edge" );
+        response.setHeader("Cache-Control","no-cache"); 
+        response.setHeader("Pragma","no-cache"); 
+        response.setDateHeader ("Expires", -1); 
     }
 
     /**
