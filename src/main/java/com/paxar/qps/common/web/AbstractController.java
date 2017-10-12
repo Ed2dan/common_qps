@@ -1,6 +1,5 @@
 package com.paxar.qps.common.web;
 
-import com.paxar.qps.common.config.D2CommProperties;
 import org.apache.log4j.Logger;
 
 import javax.servlet.ServletConfig;
@@ -158,36 +157,6 @@ public abstract class AbstractController extends HttpServlet {
      */
     protected boolean postValidation(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         return true;
-    }
-    
-    /**
-     * Extracts server base init parameter from servlet contex.
-     * @return
-     * @deprecated user {@link D2CommProperties#DB_HOST} property.
-     */
-    @Deprecated
-    protected final String getServerBaseInitParam() {
-        return getServletContext().getInitParameter(QPSWebUtils.SERVER_BASE_INIT_PARAM);
-    }
-    
-    /**
-     * Extracts DB host init parameter from servlet contex.
-     * @return
-     * @deprecated user {@link D2CommProperties#DB_HOST} property.
-     */
-    @Deprecated
-    protected final String getDBHostInitParam() {
-        return getServletContext().getInitParameter(QPSWebUtils.DB_HOST_INIT_PARAM);
-    }
-    
-    /**
-     * Extracts SMTP host init parameter from servlet contex.
-     * @return
-     * @deprecated user {@link D2CommProperties#DB_HOST} property.
-     */
-    @Deprecated
-    protected final String getSMTPHostInitParam() {
-        return getServletContext().getInitParameter(QPSWebUtils.SMTP_HOST_INIT_PARAM);
     }
 
     /**
