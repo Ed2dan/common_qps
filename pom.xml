@@ -3,49 +3,66 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>avery</groupId>
     <artifactId>common-qps</artifactId>
-    <version>1.0.1</version>
-
+    <version>1.2.0-SNAPSHOT</version>
+   <properties>
+        <maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+        <avery-dbconnect.version>0.0.1-SNAPSHOT</avery-dbconnect.version>
+        <avery-averylib.version>0.0.2-SNAPSHOT</avery-averylib.version>
+        <avery-paxar-soap.version>2.1</avery-paxar-soap.version>
+        <servlet-api.version>3.0.1</servlet-api.version>
+        <commons-configuration.version>1.10</commons-configuration.version>
+        <commons-lang.version>2.6</commons-lang.version>
+        <log4j.version>1.2.12</log4j.version>
+        <org-postgresql.version>9.1-901-1.jdbc4</org-postgresql.version>
+    </properties>
+    
     <dependencies>
         <dependency>
             <groupId>avery</groupId>
             <artifactId>averylib</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
+            <version>${avery-averylib.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>avery</groupId>
             <artifactId>dbconnect</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${avery-dbconnect.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>avery</groupId>
             <artifactId>paxar-soap</artifactId>
-            <version>2.0</version>
+            <version>${avery-paxar-soap.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.4</version>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${servlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
+            <version>${commons-lang.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.12</version>
+            <version>${log4j.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-configuration</groupId>
             <artifactId>commons-configuration</artifactId>
-            <version>1.10</version>
+            <version>${commons-configuration.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${org-postgresql.version}</version>
         </dependency>
     </dependencies>
 
@@ -53,7 +70,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>1.7</source>
                     <target>1.7</target>
