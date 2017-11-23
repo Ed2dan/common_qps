@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.paxar.dbconnect.AbstractConnection;
 import com.paxar.qps.common.config.D2CommProperties;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
