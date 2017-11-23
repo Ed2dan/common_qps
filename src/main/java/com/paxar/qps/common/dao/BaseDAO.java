@@ -1,5 +1,6 @@
 package com.paxar.qps.common.dao;
 
+import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -222,29 +223,29 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     protected PreparedStatement prepareStatement(D2CommConnection d2CommConnection, String sql, String... args) throws DatabaseException {
-    	try{
-	        PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
-	        if (args != null) {
-	            setPreparedStatementArguments(preparedStatement, args);
-	        }
-	        return preparedStatement;
-    	} finally {
-    		if(d2CommConnection != null) {
-    			d2CommConnection.releaseLock();
-    		}
-    	}
+        try {
+            PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
+            if (args != null) {
+                setPreparedStatementArguments(preparedStatement, args);
+            }
+            return preparedStatement;
+        } finally {
+            if (d2CommConnection != null) {
+                d2CommConnection.releaseLock();
+            }
+        }
     }
 
     protected PreparedStatement prepareStatement(D2CommConnection d2CommConnection, String sql, List<Object> args) throws DatabaseException {
-    	try{
-	    	PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
-	        passArguments(preparedStatement, args);
-	        return preparedStatement;
-    	} finally {
-    		if(d2CommConnection != null) {
-    			d2CommConnection.releaseLock();
-    		}
-    	}
+        try {
+            PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
+            passArguments(preparedStatement, args);
+            return preparedStatement;
+        } finally {
+            if (d2CommConnection != null) {
+                d2CommConnection.releaseLock();
+            }
+        }
     }
 
     protected PreparedStatement prepareStatement(String sql, List<Object> args) throws DatabaseException {
@@ -262,6 +263,16 @@ public abstract class BaseDAO extends AbstractDAO {
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
+        }
+    }
+
+    protected Array createArrayOf(D2CommConnection d2CommConnection, String typeName, Object[] elements) throws DatabaseException {
+        try {
+            return d2CommConnection.createArrayOf(typeName, elements);
+        } finally {
+            if (d2CommConnection != null) {
+                d2CommConnection.releaseLock();
+            }
         }
     }
 }
