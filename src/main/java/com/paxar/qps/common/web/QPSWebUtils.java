@@ -8,10 +8,6 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.lang.Validate;
 
-import com.averydennison.data.Specstar;
-import com.paxar.d2comm.TokenUpdate;
-import com.paxar.soap.SpecStarUserSoapStub;
-
 /**
  * Utility class that contains all main QPS constants (like pages, servlet init parameters, etc..) and common methods.
  * @author rsav
@@ -70,10 +66,11 @@ public final class QPSWebUtils {
     }
     
     /**
-     * Validates session. Tries to access or setup user name and if failures - throws exception.
+     * Validates session. It doesn't query SSO webservices anymore since this part should be covered by appropriate filter.
+     * It puts user and token from request in case Filter was not applied. 
      * @param request not null
      * @throws IllegalArgumentException if request is null
-     * @throws InvalidSessionException if failed to setup or access user name
+     * @throws InvalidSessionException if failed to retrieve user name from session.
      */
     public static final void validateSession(HttpServletRequest request) throws InvalidSessionException {
         Validate.notNull(request);
@@ -86,17 +83,11 @@ public final class QPSWebUtils {
         if (session.getAttribute(USER_PARAMETER) == null) {
             session.setAttribute(USER_PARAMETER, request.getParameter(USER_PARAMETER));
         }
-                
-        String token = request.getParameter(TOKEN_PARAMETER) == null ? 
-                (String) session.getAttribute(TOKEN_PARAMETER) : request.getParameter(TOKEN_PARAMETER);
-        if (Specstar.isValidToken(token)) {
-            session.setAttribute(TOKEN_PARAMETER, token);
-            String user = new SpecStarUserSoapStub().getUserDetail(token, 8); // 8 = retailer
-            if (user != null) {
-                session.setAttribute(USER_PARAMETER, user);
-            }
-            new TokenUpdate().refreshToken(token);
+        
+        if(session.getAttribute(TOKEN_PARAMETER) == null) {
+            session.setAttribute(TOKEN_PARAMETER, request.getParameter(TOKEN_PARAMETER));            
         }
+                
         if (session.getAttribute(USER_PARAMETER) == null) {
             throw new InvalidSessionException();
         }
