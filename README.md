@@ -36,7 +36,7 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
-## [2.0.2-SNAPSHOT] - ?
+## [2.0.2] - 2018.08.17
 ### Added
 - `AlphaNumericComparator` to utils package `utils`
 
