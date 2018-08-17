@@ -36,6 +36,10 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.0.2-SNAPSHOT] - ?
+### Added
+- `AlphaNumericComparator` to utils package `utils`
+
 ## [2.0.1-SNAPSHOT] - ?
 ### Added
 - MapUtils to utils package: map
