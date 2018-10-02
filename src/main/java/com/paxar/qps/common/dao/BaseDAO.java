@@ -7,7 +7,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -175,12 +177,11 @@ public abstract class BaseDAO extends AbstractDAO {
         Validate.notEmpty(columnName2, "[columnName2] parameter cannot be null or empty");
 
         try (ResultSet rs = execute(sql)) {
-            return Stream.of(rs)
-                    .filter(f -> ThrowingLambdaUtils.wrap(f::next))
-                    .collect(Collectors.toMap(
-                            key -> ThrowingLambdaUtils.wrap(() -> key.getString(columnName1)),
-                            value -> ThrowingLambdaUtils.wrap(() -> value.getString(columnName2))
-                            ));
+            Map<String, String> result = new HashMap<>();
+            while (rs.next()) {
+                result.put(rs.getString(columnName1), rs.getString(columnName2));
+            }
+            return result;
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -197,10 +198,11 @@ public abstract class BaseDAO extends AbstractDAO {
         Validate.notEmpty(columnName, "[columnName] parameter cannot be null or empty");
 
         try (ResultSet rs = execute(sql)) {
-            return Stream.of(rs)
-                    .filter(f -> ThrowingLambdaUtils.wrap(f::next))
-                    .map(f -> ThrowingLambdaUtils.wrap(() -> f.getString(columnName)))
-                    .collect(Collectors.toList());
+            List<String> result = new LinkedList<>();
+            while (rs.next()) {
+                result.add(rs.getString(columnName));
+            }
+            return result;
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
