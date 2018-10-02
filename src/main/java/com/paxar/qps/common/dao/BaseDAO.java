@@ -26,6 +26,11 @@ import org.apache.log4j.Logger;
 public abstract class BaseDAO extends AbstractDAO {
 
     private static final Logger logger = Logger.getLogger(BaseDAO.class);
+    private static final String UNEXPECTED_DATABASE_EXCEPTION_JUST_OCCURRED
+            = "Unexpected database exception just occurred";
+    private static final String UNEXPECTED_EXCEPTION_JUST_OCCURRED_DURING_EXECUTING_SCRIPT
+            = "Unexpected exception just occurred during executing script [%s]";
+    private static final String SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY = "[sql] parameter cannot be null or empty";
 
     /**
      * Host of database server.
@@ -45,16 +50,16 @@ public abstract class BaseDAO extends AbstractDAO {
      * @throws IllegalArgumentException if any argument is null
      */
     public BaseDAO(String dbHost, String dbName) {
-        Validate.notEmpty(this.dbHost = dbHost);
-        Validate.notEmpty(this.dbName = dbName);
-
+        Validate.notEmpty(dbHost);
+        Validate.notEmpty(dbName);
+        this.dbHost = dbHost;
+        this.dbName = dbName;
         AbstractDAO.initialize(dbHost);
     }
 
     public BaseDAO(String dbName) {
         this(D2CommProperties.DB_HOST, dbName);
     }
-
 
     /**
      * Returns database host field value (see {@link #dbHost}).
@@ -88,8 +93,8 @@ public abstract class BaseDAO extends AbstractDAO {
             checkConnection();
             return connection.executeQuery(this.dbName, sql);
         } catch (Exception e) {
-            logger.error(String.format("Unexpected exception just occurred during executing script [%s]", sql), e);
-            throw new DatabaseException("Unexpected database exception just occurred", e);
+            logger.error(String.format(UNEXPECTED_EXCEPTION_JUST_OCCURRED_DURING_EXECUTING_SCRIPT, sql), e);
+            throw new DatabaseException(UNEXPECTED_DATABASE_EXCEPTION_JUST_OCCURRED, e);
         }
     }
 
@@ -106,8 +111,8 @@ public abstract class BaseDAO extends AbstractDAO {
             checkConnection();
             connection.executeUpdate(this.dbName, sql);
         } catch (Exception e) {
-            logger.error(String.format("Unexpected exception just occurred during executing script [%s]", sql), e);
-            throw new DatabaseException("Unexpected database exception just occurred", e);
+            logger.error(String.format(UNEXPECTED_EXCEPTION_JUST_OCCURRED_DURING_EXECUTING_SCRIPT, sql), e);
+            throw new DatabaseException(UNEXPECTED_DATABASE_EXCEPTION_JUST_OCCURRED, e);
         }
     }
 
@@ -124,8 +129,8 @@ public abstract class BaseDAO extends AbstractDAO {
             checkConnection();
             connection.executeUpdate(this.dbName, new Vector<>(queries));
         } catch (Exception e) {
-            logger.error(String.format("Unexpected exception just occurred during executing script [%s]", queries), e);
-            throw new DatabaseException("Unexpected database exception just occurred", e);
+            logger.error(String.format(UNEXPECTED_EXCEPTION_JUST_OCCURRED_DURING_EXECUTING_SCRIPT, queries), e);
+            throw new DatabaseException(UNEXPECTED_DATABASE_EXCEPTION_JUST_OCCURRED, e);
         }
     }
 
@@ -165,7 +170,7 @@ public abstract class BaseDAO extends AbstractDAO {
      */
     protected Map<String, String> executeToStringMap(String sql, String columnName1, String columnName2)
             throws DatabaseException {
-        Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");
+        Validate.notEmpty(sql, SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         Validate.notEmpty(columnName1, "[columnName1] parameter cannot be null or empty");
         Validate.notEmpty(columnName2, "[columnName2] parameter cannot be null or empty");
 
@@ -188,7 +193,7 @@ public abstract class BaseDAO extends AbstractDAO {
      * @param columnName column to return
      */
     protected List<String> executeToStringList(String sql, String columnName) throws DatabaseException {
-        Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");
+        Validate.notEmpty(sql, SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         Validate.notEmpty(columnName, "[columnName] parameter cannot be null or empty");
 
         try (ResultSet rs = execute(sql)) {
@@ -211,7 +216,7 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     protected PreparedStatement prepareStatement(String sql) throws DatabaseException {
-        Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");
+        Validate.notEmpty(sql, SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         try {
             return connection.prepareStatement(dbName, sql);
         } catch (Exception e) {
