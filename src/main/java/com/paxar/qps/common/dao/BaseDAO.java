@@ -1,23 +1,24 @@
 package com.paxar.qps.common.dao;
 
+import com.averydennison.data.AbstractDAO;
+import com.paxar.qps.common.config.D2CommProperties;
+import com.paxar.qps.common.utils.stream.ThrowingLambdaUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.paxar.qps.common.config.D2CommProperties;
+import java.util.Vector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
-import com.averydennison.data.AbstractDAO;
-
 /**
- * <p>Provides better abstraction for creating DAO classes in comparison with {@link AbstractDAO}</p>
+ * <p>Provides better abstraction for creating DAO classes in comparison with {@link AbstractDAO}</p>.
  *
  * @author rsav
  * @version 1.0
@@ -27,11 +28,11 @@ public abstract class BaseDAO extends AbstractDAO {
     private static final Logger logger = Logger.getLogger(BaseDAO.class);
 
     /**
-     * Host of database server
+     * Host of database server.
      */
     private String dbHost;
     /**
-     * Name of database
+     * Name of database.
      */
     private String dbName;
 
@@ -79,7 +80,7 @@ public abstract class BaseDAO extends AbstractDAO {
      * @param sql script, not empty
      * @return Result set of executed script
      * @throws IllegalArgumentException if script is empty
-     * @throws DatabaseException        if it was failed to execute script
+     * @throws DatabaseException if it was failed to execute script
      */
     protected ResultSet execute(String sql) throws DatabaseException {
         Validate.notEmpty(sql);
@@ -93,11 +94,11 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     /**
-     * Executes specified script
+     * Executes specified script.
      *
      * @param sql script, not empty
      * @throws IllegalArgumentException if script is empty
-     * @throws DatabaseException        if it was failed to execute script
+     * @throws DatabaseException if it was failed to execute script
      */
     protected void executeUpdate(String sql) throws DatabaseException {
         Validate.notEmpty(sql);
@@ -111,13 +112,29 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     /**
+     * Executes specified scripts.
+     *
+     * @param queries scripts, not empty
+     * @throws IllegalArgumentException if script is empty
+     * @throws DatabaseException if it was failed to execute script
+     */
+    protected void executeUpdate(List<String> queries) throws DatabaseException {
+        Validate.notEmpty(queries);
+        try {
+            checkConnection();
+            connection.executeUpdate(this.dbName, new Vector<>(queries));
+        } catch (Exception e) {
+            logger.error(String.format("Unexpected exception just occurred during executing script [%s]", queries), e);
+            throw new DatabaseException("Unexpected database exception just occurred", e);
+        }
+    }
+
+    /**
      * <p>Escapes parameter value.</p>
      * <p>Calls {@link AbstractDAO#esc(String)} method.</p>
      *
-     * @param sql
      * @return Escaped value
      * @throws IllegalArgumentException if argument is null.
-     * @return Escaped value
      */
     protected String escape(String sql) {
         Validate.notNull(sql);
@@ -125,7 +142,7 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     /**
-     * Performs {@link #escape(String)} method on each value of specified set and returns new set withb escaped values.
+     * Performs {@link #escape(String)} method on each value of specified set and returns new set with escaped values.
      *
      * @param values set with values that should be escaped
      * @return new {@link HashSet} instance with escaped values from original set
@@ -135,37 +152,30 @@ public abstract class BaseDAO extends AbstractDAO {
         Validate.notNull(values);
         Validate.notEmpty(values);
         Validate.noNullElements(values);
-
-        final Set<String> result = new HashSet<>();
-
-        for (String value : values) {
-            result.add(escape(value));
-        }
-
-        return result;
+        return values.stream().map(this::escape).collect(Collectors.toSet());
     }
 
 
     /**
      * Executes sql script and returns map with given column key-values.
      *
-     * @param sql         script to execute
+     * @param sql script to execute
      * @param columnName1 key of the map entry
      * @param columnName2 value of the map entry
-     * @return
-     * @throws DatabaseException
      */
-    protected Map<String, String> executeToStringMap(String sql, String columnName1, String columnName2) throws DatabaseException {
+    protected Map<String, String> executeToStringMap(String sql, String columnName1, String columnName2)
+            throws DatabaseException {
         Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");
         Validate.notEmpty(columnName1, "[columnName1] parameter cannot be null or empty");
         Validate.notEmpty(columnName2, "[columnName2] parameter cannot be null or empty");
 
         try (ResultSet rs = execute(sql)) {
-            Map<String, String> result = new HashMap<>();
-            while (rs.next()) {
-                result.put(rs.getString(columnName1), rs.getString(columnName2));
-            }
-            return result;
+            return Stream.of(rs)
+                    .filter(f -> ThrowingLambdaUtils.wrap(f::next))
+                    .collect(Collectors.toMap(
+                            key -> ThrowingLambdaUtils.wrap(() -> key.getString(columnName1)),
+                            value -> ThrowingLambdaUtils.wrap(() -> value.getString(columnName2))
+                            ));
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -174,21 +184,18 @@ public abstract class BaseDAO extends AbstractDAO {
     /**
      * Executes sql script and returns given column values.
      *
-     * @param sql        script to execute
+     * @param sql script to execute
      * @param columnName column to return
-     * @return
-     * @throws DatabaseException
      */
     protected List<String> executeToStringList(String sql, String columnName) throws DatabaseException {
         Validate.notEmpty(sql, "[sql] parameter cannot be null or empty");
         Validate.notEmpty(columnName, "[columnName] parameter cannot be null or empty");
 
         try (ResultSet rs = execute(sql)) {
-            List<String> result = new ArrayList<>();
-            while (rs.next()) {
-                result.add(rs.getString(columnName));
-            }
-            return result;
+            return Stream.of(rs)
+                    .filter(f -> ThrowingLambdaUtils.wrap(f::next))
+                    .map(f -> ThrowingLambdaUtils.wrap(() -> f.getString(columnName)))
+                    .collect(Collectors.toList());
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -216,52 +223,41 @@ public abstract class BaseDAO extends AbstractDAO {
     protected PreparedStatement prepareStatement(String sql, String... args) throws DatabaseException {
         PreparedStatement preparedStatement = prepareStatement(sql);
         if (args != null) {
-            setPreparedStatementArguments(preparedStatement, args);
+            passArguments(preparedStatement, Arrays.asList(args));
         }
         return preparedStatement;
     }
 
-    protected PreparedStatement prepareStatement(D2CommConnection d2CommConnection, String sql, String... args) throws DatabaseException {
-    	try{
-	        PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
-	        if (args != null) {
-	            setPreparedStatementArguments(preparedStatement, args);
-	        }
-	        return preparedStatement;
-    	} finally {
-    		if(d2CommConnection != null) {
-    			d2CommConnection.releaseLock();
-    		}
-    	}
+    protected PreparedStatement prepareStatement(D2CommConnection d2CommConnection, String sql, String... args)
+            throws DatabaseException {
+        try {
+            PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
+            if (args != null) {
+                passArguments(preparedStatement, Arrays.asList(args));
+            }
+            return preparedStatement;
+        } finally {
+            if (d2CommConnection != null) {
+                d2CommConnection.releaseLock();
+            }
+        }
     }
 
-    protected PreparedStatement prepareStatement(D2CommConnection d2CommConnection, String sql, List<Object> args) throws DatabaseException {
-    	try{
-	    	PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
-	        passArguments(preparedStatement, args);
-	        return preparedStatement;
-    	} finally {
-    		if(d2CommConnection != null) {
-    			d2CommConnection.releaseLock();
-    		}
-    	}
-    }
-
-    protected PreparedStatement prepareStatement(String sql, List<Object> args) throws DatabaseException {
-        return prepareStatement(getConnection(), sql, args);
+    protected PreparedStatement prepareStatement(D2CommConnection d2CommConnection, String sql, List<Object> args)
+            throws DatabaseException {
+        try {
+            PreparedStatement preparedStatement = d2CommConnection.prepareStatement(sql);
+            passArguments(preparedStatement, args);
+            return preparedStatement;
+        } finally {
+            if (d2CommConnection != null) {
+                d2CommConnection.releaseLock();
+            }
+        }
     }
 
     private void passArguments(PreparedStatement preparedStatement, List<Object> args) throws DatabaseException {
         PreparedStatementArgumentSetter.passArguments(preparedStatement, args);
     }
 
-    private void setPreparedStatementArguments(PreparedStatement preparedStatement, String[] args) throws DatabaseException {
-        try {
-            for (int i = 1; i <= args.length; i++) {
-                preparedStatement.setString(i, args[i - 1]);
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        }
-    }
 }
