@@ -36,6 +36,13 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.1.0-SNAPSHOT] - 2018.10.02
+### Compatible versions and migration:
+- Java 1.8
+
+### Added
+- Ability to use checked exception in lambda expressions.
+
 ## [2.0.2] - 2018.08.17
 ### Added
 - `AlphaNumericComparator` to utils package `utils`
