@@ -9,7 +9,6 @@ import com.paxar.qps.common.utils.stream.procedure.Procedure1;
 import com.paxar.qps.common.utils.stream.procedure.Procedure2;
 import com.paxar.qps.common.utils.stream.procedure.Procedure3;
 
-
 /**
  * Lets you use checked exception in lambda expressions.
  */
