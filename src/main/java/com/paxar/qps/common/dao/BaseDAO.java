@@ -2,7 +2,6 @@ package com.paxar.qps.common.dao;
 
 import com.averydennison.data.AbstractDAO;
 import com.paxar.qps.common.config.D2CommProperties;
-import com.paxar.qps.common.utils.stream.ThrowingLambdaUtils;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -15,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
@@ -32,7 +30,7 @@ public abstract class BaseDAO extends AbstractDAO {
             = "Unexpected database exception just occurred";
     private static final String UNEXPECTED_EXCEPTION_JUST_OCCURRED_DURING_EXECUTING_SCRIPT
             = "Unexpected exception just occurred during executing script [%s]";
-    private static final String SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY = "parameter cannot be null or empty";
+    private static final String PARAMETER_CANNOT_BE_NULL_OR_EMPTY = "parameter cannot be null or empty";
 
     /**
      * Host of database server.
@@ -172,9 +170,9 @@ public abstract class BaseDAO extends AbstractDAO {
      */
     protected Map<String, String> executeToStringMap(String sql, String columnName1, String columnName2)
             throws DatabaseException {
-        Validate.notEmpty(sql, "[sql] " + SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
-        Validate.notEmpty(columnName1, "[columnName1] parameter cannot be null or empty");
-        Validate.notEmpty(columnName2, "[columnName2] parameter cannot be null or empty");
+        Validate.notEmpty(sql, "[sql] " + PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(columnName1, "[columnName1] " + PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(columnName2, "[columnName2] " + PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
 
         try (ResultSet rs = execute(sql)) {
             Map<String, String> result = new HashMap<>();
@@ -194,8 +192,8 @@ public abstract class BaseDAO extends AbstractDAO {
      * @param columnName column to return
      */
     protected List<String> executeToStringList(String sql, String columnName) throws DatabaseException {
-        Validate.notEmpty(sql, "[sql] " +SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
-        Validate.notEmpty(columnName, "[columnName] parameter cannot be null or empty");
+        Validate.notEmpty(sql, "[sql] " + PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(columnName, "[columnName] " + PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
 
         try (ResultSet rs = execute(sql)) {
             List<String> result = new LinkedList<>();
@@ -218,7 +216,7 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     protected PreparedStatement prepareStatement(String sql) throws DatabaseException {
-        Validate.notEmpty(sql, "[sql] " +SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(sql, "[sql] " + PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         try {
             return connection.prepareStatement(dbName, sql);
         } catch (Exception e) {
