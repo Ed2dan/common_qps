@@ -10,7 +10,19 @@ import com.paxar.qps.common.utils.stream.procedure.Procedure2;
 import com.paxar.qps.common.utils.stream.procedure.Procedure3;
 
 /**
- * Lets you use checked exception in lambda expressions.
+ * Class allows for checked exceptions to be thrown in lambda expressions.
+ * <pre>
+ *     {@code
+ *          try (ResultSet rs = execute(sql)) {
+ *               Stream.of(rs)
+ *                   .filter(f -> ThrowingLambdaUtils.wrap(f::next))
+ *                   .map(f -> ThrowingLambdaUtils.wrap(() -> f.getString(int))
+ *                   .collect(Collectors.toList());
+ *          } catch(SQLException ex) {
+ *               throw new DatabaseException(e);
+ *          }
+ *     }
+ * </pre>
  */
 public final class ThrowingLambdaUtils {
 
