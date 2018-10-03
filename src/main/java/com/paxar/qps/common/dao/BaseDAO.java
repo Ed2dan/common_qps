@@ -32,7 +32,7 @@ public abstract class BaseDAO extends AbstractDAO {
             = "Unexpected database exception just occurred";
     private static final String UNEXPECTED_EXCEPTION_JUST_OCCURRED_DURING_EXECUTING_SCRIPT
             = "Unexpected exception just occurred during executing script [%s]";
-    private static final String SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY = "[sql] parameter cannot be null or empty";
+    private static final String SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY = "parameter cannot be null or empty";
 
     /**
      * Host of database server.
@@ -172,7 +172,7 @@ public abstract class BaseDAO extends AbstractDAO {
      */
     protected Map<String, String> executeToStringMap(String sql, String columnName1, String columnName2)
             throws DatabaseException {
-        Validate.notEmpty(sql, SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(sql, "[sql] " + SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         Validate.notEmpty(columnName1, "[columnName1] parameter cannot be null or empty");
         Validate.notEmpty(columnName2, "[columnName2] parameter cannot be null or empty");
 
@@ -194,7 +194,7 @@ public abstract class BaseDAO extends AbstractDAO {
      * @param columnName column to return
      */
     protected List<String> executeToStringList(String sql, String columnName) throws DatabaseException {
-        Validate.notEmpty(sql, SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(sql, "[sql] " +SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         Validate.notEmpty(columnName, "[columnName] parameter cannot be null or empty");
 
         try (ResultSet rs = execute(sql)) {
@@ -218,7 +218,7 @@ public abstract class BaseDAO extends AbstractDAO {
     }
 
     protected PreparedStatement prepareStatement(String sql) throws DatabaseException {
-        Validate.notEmpty(sql, SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
+        Validate.notEmpty(sql, "[sql] " +SQL_PARAMETER_CANNOT_BE_NULL_OR_EMPTY);
         try {
             return connection.prepareStatement(dbName, sql);
         } catch (Exception e) {
