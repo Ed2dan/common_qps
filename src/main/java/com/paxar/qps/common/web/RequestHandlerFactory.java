@@ -106,7 +106,7 @@ public class RequestHandlerFactory {
 
     /**
      * <p>Makes specified request validator instance as default in this factory (see {@link #defaultRequestValidator}).</p>
-     * <p><strong>Note: </strong>if factory already contains default request validator - it will be overidden.</p>
+     * <p><strong>Note: </strong>if factory already contains default request validator - it will be overridden.</p>
      * @param requestValidator, not null
      * @return Current request handler factory instance
      * @throws IllegalArgumentException if request validator is null
