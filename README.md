@@ -36,6 +36,12 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.1.1-SNAPSHOT] - 2018.11.02
+### Added
+- `RequestValidator` for possible validation before `RequestHandler` will work.
+### Changed
+- `AbstractController` will call `RequestValidator.validate()` if `RequestValidator` is present.
+
 ## [2.1.0-SNAPSHOT] - 2018.10.02
 ### Compatible versions and migration:
 - Java 1.8
