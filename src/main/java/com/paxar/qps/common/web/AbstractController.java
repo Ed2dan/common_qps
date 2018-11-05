@@ -1,7 +1,6 @@
 package com.paxar.qps.common.web;
 
 import java.io.IOException;
-import java.util.Map;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -100,21 +99,13 @@ public abstract class AbstractController extends HttpServlet {
             return;
         }
         try {
-            if (!preValidation(request, response)) {
-                return;
-            }
-            QPSWebUtils.validateSession(request);
-            if (!postValidation(request, response)) {
+            if (!validateAndAuthorize(request, response)) {
                 return;
             }
 
-            final Map.Entry<RequestHandler, RequestValidator> handlerAndValidator = this.requestHandlerFactory
-                    .getRequestHandler(request);
+            final RequestHandler handler = this.requestHandlerFactory.getRequestHandler(request);
 
-            if (handlerAndValidator.getValue() != null && !handlerAndValidator.getValue().validate(request, response)) {
-                return;
-            }
-            handlerAndValidator.getKey().handle(request, response);
+            handler.handle(request, response);
         } catch (InvalidSessionException e) {
             getLogger().error("Failed to process request due to invalid session", e);
             onInvalidSessionException(request, response, e);
@@ -123,6 +114,21 @@ public abstract class AbstractController extends HttpServlet {
             onRequestHandlerNotFoundException(request, response, e);
         }
         postProcess(request, response);
+    }
+
+    private boolean validateAndAuthorize(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException, InvalidSessionException {
+        if (!preValidation(request, response)) {
+            return false;
+        }
+        QPSWebUtils.validateSession(request);
+
+        if (!postValidation(request, response)) {
+            return false;
+        }
+        return this.requestHandlerFactory.getRequestAuthorizator(request)
+                .map(auth -> auth.authorize(request, response))
+                .orElse(false);
     }
 
     private void setNoCahce(HttpServletResponse response) {
