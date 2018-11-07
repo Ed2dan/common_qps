@@ -128,7 +128,7 @@ public abstract class AbstractController extends HttpServlet {
         }
         return this.requestHandlerFactory.getRequestAuthorizator(request)
                 .map(auth -> auth.authorize(request, response))
-                .orElse(false);
+                .orElse(true);
     }
 
     private void setNoCahce(HttpServletResponse response) {
