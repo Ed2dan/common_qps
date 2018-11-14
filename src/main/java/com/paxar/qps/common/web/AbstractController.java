@@ -128,7 +128,7 @@ public abstract class AbstractController extends HttpServlet {
         }
         return this.requestHandlerFactory.getRequestAuthorizator(request)
                 .map(auth -> auth.authorize(request, response))
-                .orElse(true);
+                .orElseThrow(() -> new IllegalStateException("There should be an Authorizator for [actionId]"));
     }
 
     private void setNoCahce(HttpServletResponse response) {
