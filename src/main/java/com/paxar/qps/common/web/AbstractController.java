@@ -126,9 +126,9 @@ public abstract class AbstractController extends HttpServlet {
         if (!postValidation(request, response)) {
             return false;
         }
-        return this.requestHandlerFactory.getRequestAuthorizator(request)
+        return this.requestHandlerFactory.getRequestAuthorizer(request)
                 .map(auth -> auth.authorize(request, response))
-                .orElseThrow(() -> new IllegalStateException("There should be an Authorizator for [actionId]"));
+                .orElseThrow(() -> new IllegalStateException("There should be an Authorizer for [actionId]. You can put DefaultAuthorizer there."));
     }
 
     private void setNoCahce(HttpServletResponse response) {
