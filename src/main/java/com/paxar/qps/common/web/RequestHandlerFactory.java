@@ -23,10 +23,10 @@ public class RequestHandlerFactory {
     private Map<String, RequestHandler> requestHandlers = new HashMap<>();
 
     /**
-     * <p>Map with all authorizators that will be provided by factory.</p>
+     * <p>Map with all authorizers that will be provided by factory.</p>
      * <p>Contains action id as key, and corresponding request security instance as value.</p>
      */
-    private Map<String, RequestAuthorizator> requestAuthorizators = new HashMap<>();
+    private Map<String, RequestAuthorizer> requestAuthorizers = new HashMap<>();
 
     /**
      * <p>Default request handler that will be used if system tries to get request handler for empty action id.</p>
@@ -38,7 +38,7 @@ public class RequestHandlerFactory {
      * <p>Default request security that will be used if system tries to get request security for empty action id.</p>
      * <p>Can be null.</p>
      */
-    private RequestAuthorizator defaultRequestAuthorizator;
+    private RequestAuthorizer defaultRequestAuthorizer;
 
     /**
      * Default request handler factory constructor.
@@ -61,15 +61,15 @@ public class RequestHandlerFactory {
     }
 
     /**
-     * <p>Looks for {@link RequestAuthorizator} implementation that might be used for authorization specified request.</p>
+     * <p>Looks for {@link RequestAuthorizer} implementation that might be used for authorization specified request.</p>
      * <p>
      *  Extracts action id parameter from request by key {@link QPSWebUtils#REQUEST_PARAMETER_ACTION_ID}
-     *  and uses {@link #getRequestAuthorizator(String)} with this value in order to found necessary request security.
+     *  and uses {@link #getRequestAuthorizer(String)} with this value in order to found necessary request security.
      *  @param request
      * </p>
      */
-    public Optional<RequestAuthorizator> getRequestAuthorizator(HttpServletRequest request) {
-        return getRequestAuthorizator(request.getParameter(QPSWebUtils.REQUEST_PARAMETER_ACTION_ID));
+    public Optional<RequestAuthorizer> getRequestAuthorizer(HttpServletRequest request) {
+        return getRequestAuthorizer(request.getParameter(QPSWebUtils.REQUEST_PARAMETER_ACTION_ID));
     }
 
     /**
@@ -94,15 +94,15 @@ public class RequestHandlerFactory {
 
     /**
      * <p>Lookups for request security with specified action id</p>
-     * <p>If action id is empty but factory contains default request security (see {@link #defaultRequestAuthorizator}) - it returns default request security instance.</p>
+     * <p>If action id is empty but factory contains default request security (see {@link #defaultRequestAuthorizer}) - it returns default request security instance.</p>
      * @param actionId id that will be used for looking up for necessary request security
      * @return Request security that corresponds to specified action id
      */
-    public Optional<RequestAuthorizator> getRequestAuthorizator(String actionId) {
-        if (StringUtils.isEmpty(actionId) || !this.requestAuthorizators.containsKey(actionId)) {
-            return getDefaultRequestAuthorizator();
+    public Optional<RequestAuthorizer> getRequestAuthorizer(String actionId) {
+        if (StringUtils.isEmpty(actionId) || !this.requestAuthorizers.containsKey(actionId)) {
+            return getDefaultRequestAuthorizer();
         }
-        return Optional.ofNullable(this.requestAuthorizators.get(actionId));
+        return Optional.ofNullable(this.requestAuthorizers.get(actionId));
     }
 
     /**
@@ -122,18 +122,19 @@ public class RequestHandlerFactory {
     }
 
     /**
-     * <p>Puts request authorizator with specified action id to list of request authorizators.</p>
-     * <p><strong>Note: </strong>if factory already contains request authorizator with such action id - it will be overridden with new authorizator.</p>
+     * <p>Puts request authorizer with specified action id to list of request authorizers.</p>
+     * <p><strong>Note: </strong>if factory already contains request authorizer with such action id - it will be overridden with new authorizer.</p>
      * @param actionId, not empty
-     * @param requestAuthorizator, not null
+     * @param requestAuthorizer, not null
      * @return Current request handler factory instance
-     * @throws IllegalArgumentException if action id is empty, or request authorizator is null
+     * @throws IllegalArgumentException if action id is empty, or request authorizer is null
      */
-    public RequestHandlerFactory putRequestAuthorizator(String actionId, RequestAuthorizator requestAuthorizator) {
+    public RequestHandlerFactory putRequestAuthorizer(final String actionId,
+            final RequestAuthorizer requestAuthorizer) {
         Validate.notEmpty(actionId);
-        Validate.notNull(requestAuthorizator);
+        Validate.notNull(requestAuthorizer);
 
-        this.requestAuthorizators.put(actionId, requestAuthorizator);
+        this.requestAuthorizers.put(actionId, requestAuthorizer);
         return this;
     }
 
@@ -166,16 +167,16 @@ public class RequestHandlerFactory {
     }
 
     /**
-     * <p>Makes specified request security instance as default in this factory (see {@link #defaultRequestAuthorizator}).</p>
+     * <p>Makes specified request security instance as default in this factory (see {@link #defaultRequestAuthorizer}).</p>
      * <p><strong>Note: </strong>if factory already contains default request security - it will be overridden.</p>
-     * @param requestAuthorizator, not null
+     * @param requestAuthorizer, not null
      * @return Current request handler factory instance
      * @throws IllegalArgumentException if request handler is null
      */
-    public RequestHandlerFactory putDefaultRequestAuthorizator(RequestAuthorizator requestAuthorizator) {
-        Validate.notNull(requestAuthorizator);
+    public RequestHandlerFactory putDefaultRequestAuthorizer(final RequestAuthorizer requestAuthorizer) {
+        Validate.notNull(requestAuthorizer);
 
-        this.defaultRequestAuthorizator = requestAuthorizator;
+        this.defaultRequestAuthorizer = requestAuthorizer;
         return this;
     }
 
@@ -186,8 +187,8 @@ public class RequestHandlerFactory {
         return this.defaultRequestHandler;
     }
 
-    private Optional<RequestAuthorizator> getDefaultRequestAuthorizator() {
-        return Optional.ofNullable(this.defaultRequestAuthorizator);
+    private Optional<RequestAuthorizer> getDefaultRequestAuthorizer() {
+        return Optional.ofNullable(this.defaultRequestAuthorizer);
     }
 
     public final class ValidationBinder {
@@ -198,9 +199,9 @@ public class RequestHandlerFactory {
             this.currentActionId = currentActionId;
         }
 
-        public RequestHandlerFactory withAuthorizator(final RequestAuthorizator authorizator) {
-            if (authorizator != null) {
-                RequestHandlerFactory.this.requestAuthorizators.put(currentActionId, authorizator);
+        public RequestHandlerFactory withAuthorizer(final RequestAuthorizer authorizer) {
+            if (authorizer != null) {
+                RequestHandlerFactory.this.requestAuthorizers.put(currentActionId, authorizer);
             }
             return RequestHandlerFactory.this;
         }
@@ -210,7 +211,7 @@ public class RequestHandlerFactory {
         }
 
         /**
-         * <p>This method is not required to be called. It is just to have returning possibility to {@link RequestHandlerFactory} object without setting a {@link RequestAuthorizator}.</p>
+         * <p>This method is not required to be called. It is just to have returning possibility to {@link RequestHandlerFactory} object without setting a {@link RequestAuthorizer}.</p>
          */
         public RequestHandlerFactory finish() {
             return RequestHandlerFactory.this;
