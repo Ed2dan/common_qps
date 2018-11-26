@@ -6,7 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -130,10 +129,7 @@ public abstract class AbstractController extends HttpServlet {
 
         final String actionId = request.getParameter(QPSWebUtils.REQUEST_PARAMETER_ACTION_ID);
 
-        if (StringUtils.isBlank(actionId)) {
-            return true;
-        }
-        return this.requestHandlerFactory.getRequestAuthorizer(request)
+        return this.requestHandlerFactory.getRequestAuthorizer(actionId)
                 .map(auth -> auth.authorize(request, response))
                 .orElseThrow(() -> new IllegalStateException("There should be an Authorizer for [actionId] = '"
                         + actionId + "'. You can put DefaultAuthorizer there."));
