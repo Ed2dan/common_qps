@@ -10,5 +10,5 @@ public interface RequestAuthorizer {
 
     boolean authorize(final HttpServletRequest httpServletRequest, final HttpServletResponse httpServletResponse);
 
-    void onDenied(final HttpServletRequest req, final HttpServletResponse resp);
+    void onAccessDenied(final HttpServletRequest req, final HttpServletResponse resp);
 }
