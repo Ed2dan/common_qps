@@ -130,7 +130,14 @@ public abstract class AbstractController extends HttpServlet {
         final String actionId = request.getParameter(QPSWebUtils.REQUEST_PARAMETER_ACTION_ID);
 
         return this.requestHandlerFactory.getRequestAuthorizer(actionId)
-                .map(auth -> auth.authorize(request, response))
+                .map(auth -> {
+                    final boolean result = auth.authorize(request, response);
+
+                    if (!result && auth instanceof OnAuthorizerFailedListener) {
+                        ((OnAuthorizerFailedListener) auth).onFail(request, response);
+                    }
+                    return result;
+                })
                 .orElseThrow(() -> new IllegalStateException("There should be an Authorizer for [actionId] = '"
                         + actionId + "'. You can put DefaultAuthorizer there."));
     }
