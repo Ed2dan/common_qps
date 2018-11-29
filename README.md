@@ -38,9 +38,7 @@ Guiding Principles:
 
 ## [2.1.3-SNAPSHOT] - 2018.11.29
 ### Added
-- `OnAuthorizerFailedListener` - an action if `RequestAuthorizer` fails.
-### Changed
-- `AbstractController` will check if `RequestAuthorizer` is instance of `OnAuthorizerFailedListener` and then calls its `onFail()`.
+- `RequestAuthorizer` - now has method `onDenied()`.
 
 ## [2.1.2-SNAPSHOT] - 2018.11.26
 ### Changed
