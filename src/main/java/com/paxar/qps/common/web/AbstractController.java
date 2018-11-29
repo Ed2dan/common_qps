@@ -131,12 +131,12 @@ public abstract class AbstractController extends HttpServlet {
 
         return this.requestHandlerFactory.getRequestAuthorizer(actionId)
                 .map(auth -> {
-                    final boolean result = auth.authorize(request, response);
+                    final boolean granted = auth.authorize(request, response);
 
-                    if (!result && auth instanceof OnAuthorizerFailedListener) {
-                        ((OnAuthorizerFailedListener) auth).onFail(request, response);
+                    if (!granted) {
+                        auth.onDenied(request, response);
                     }
-                    return result;
+                    return granted;
                 })
                 .orElseThrow(() -> new IllegalStateException("There should be an Authorizer for [actionId] = '"
                         + actionId + "'. You can put DefaultAuthorizer there."));
