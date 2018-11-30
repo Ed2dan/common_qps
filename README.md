@@ -36,6 +36,10 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.1.3-SNAPSHOT] - 2018.11.29
+### Added
+- `RequestAuthorizer` - now has method `onDenied()`.
+
 ## [2.1.2-SNAPSHOT] - 2018.11.26
 ### Changed
 - `AbstractController` will use default `RequestAuthorizer` if `actionId` is blank.
