@@ -36,6 +36,27 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.1.3] - 2018.12.20
+### Added
+- `RequestAuthorizer` - now has method `onDenied()`.
+
+## [2.1.2-SNAPSHOT] - 2018.11.26
+### Changed
+- `AbstractController` will use default `RequestAuthorizer` if `actionId` is blank.
+
+## [2.1.1-SNAPSHOT] - 2018.11.02
+### Added
+- `RequestValidator` for possible validation before `RequestHandler` will work.
+### Changed
+- `AbstractController` will call `RequestAuthorizer.authorize()` if `RequestAuthorizer` is present.
+
+## [2.1.0-SNAPSHOT] - 2018.10.02
+### Compatible versions and migration:
+- Java 1.8
+
+### Added
+- Ability to use checked exception in lambda expressions.
+
 ## [2.0.2] - 2018.08.17
 ### Added
 - `AlphaNumericComparator` to utils package `utils`
