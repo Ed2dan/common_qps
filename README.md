@@ -36,7 +36,7 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
-## [2.1.3-SNAPSHOT] - 2018.11.29
+## [2.1.3] - 2018.12.20
 ### Added
 - `RequestAuthorizer` - now has method `onDenied()`.
 
