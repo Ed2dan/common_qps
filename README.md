@@ -36,6 +36,15 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.1.4-SNAPSHOT]
+### Fixed:
+- Prevent java.lang.NumberFormatException while comparing text with alpha-numeric comparator.  
+As alpha-numeric comparator divides text on numbers and letters - there might be a case that number is too 
+small for Integer. Maximum number value for Integer is 2,147,483,647.  
+For example: in text "ABC80504572795201" number 80504572795201 does not match Integer type and exception is thrown.  
+As a resolution, alpha-numeric comparator now treats numbers as Long. 
+Maximum value for Long is 9,223,372,036,854,775,807 which is a much bigger range. 
+
 ## [2.1.3-SNAPSHOT] - 2018.11.29
 ### Added
 - `RequestAuthorizer` - now has method `onDenied()`.

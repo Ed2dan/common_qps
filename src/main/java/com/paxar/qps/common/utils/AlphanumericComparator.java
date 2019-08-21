@@ -32,7 +32,7 @@ public class AlphanumericComparator implements Comparator<String> {
 
     private int compareChunks(String chunk1, String chunk2) {
         if (StringUtils.isNumeric(chunk1) && StringUtils.isNumeric(chunk2)) {
-            return Integer.valueOf(chunk1).compareTo(Integer.valueOf(chunk2));
+            return Long.valueOf(chunk1).compareTo(Long.valueOf(chunk2));
         } else if (StringUtils.isBlank(chunk1) && StringUtils.isBlank(chunk2)) {
             return 0;
         } else {
