@@ -1,10 +1,11 @@
 package com.paxar.qps.common.utils;
 
+import java.math.BigInteger;
+import java.util.Comparator;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Comparator;
-
 public class AlphanumericComparator implements Comparator<String> {
+
     @Override
     public int compare(String s1, String s2) {
         if (s1 == null && s2 == null) {
@@ -25,14 +26,14 @@ public class AlphanumericComparator implements Comparator<String> {
             }
         }
         if (chunks1.length != chunks2.length) {
-            return new Integer(chunks1.length).compareTo(chunks2.length);
+            return Integer.compare(chunks1.length, chunks2.length);
         }
         return 0;
     }
 
     private int compareChunks(String chunk1, String chunk2) {
         if (StringUtils.isNumeric(chunk1) && StringUtils.isNumeric(chunk2)) {
-            return Integer.valueOf(chunk1).compareTo(Integer.valueOf(chunk2));
+            return new BigInteger(chunk1).compareTo(new BigInteger(chunk2));
         } else if (StringUtils.isBlank(chunk1) && StringUtils.isBlank(chunk2)) {
             return 0;
         } else {
