@@ -36,14 +36,14 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
-## [2.1.4-SNAPSHOT]
+## [2.1.4] - 2019.08.30
 ### Fixed
 - `AlphanumericComparator` was limited by `Integer` chunks comparison and threw `NumberFormatException` for the bigger ones.
 Switched `Integer` to `BigInteger` which also changed performance (tested with shuffled string `123456789`):
 10_000 entries: Integer - 151 millis, BigInteger - 69 millis;
 1_000_000 entries: Integer - 5757 millis, BigInteger - 6234 millis.
 
-## [2.1.3-SNAPSHOT]
+## [2.1.3-SNAPSHOT] - 2018.12.20
 ### Added
 - `RequestAuthorizer` - now has method `onDenied()`.
 
