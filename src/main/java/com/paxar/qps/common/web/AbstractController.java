@@ -34,9 +34,6 @@ import org.apache.log4j.Logger;
  * in order to use this abstraction user should implement methods that will setting up request handler factory
  * and respond on situations, when request handler was not found for some request.
  * </p>
- *
- * @author rsav
- * @version 1.0
  */
 public abstract class AbstractController extends HttpServlet {
 
@@ -45,15 +42,15 @@ public abstract class AbstractController extends HttpServlet {
     /**
      * Contains all request handlers that are supported by controller implementation.
      */
-    private RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
+    private final RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         try {
             setupRequestHandlerFactory(this.requestHandlerFactory);
-        } catch (RequestHandlerFactorySetupException e) {
-            getLogger().error("Failed to setup request handler factory due to unexpected exception", e);
+        } catch (RequestHandlerFactorySetupException ex) {
+            getLogger().error("Failed to setup request handler factory due to unexpected exception", ex);
             throw new ServletException(
                     "Failed to init controller due to unexpected exception during reuqest handler factory setup");
         }
@@ -73,12 +70,11 @@ public abstract class AbstractController extends HttpServlet {
 
     /**
      * <p>Handles GET and POST requests.</p>
-     * <p>Validates session and if it is not valid - redirects user to login page (see {@link #LOGIN_PAGE_URL})</p>
+     * <p>Validates session and if it is not valid - redirects user to login page (see {@link QPSWebUtils#URL_LOGIN_PAGE})</p>
      * <p>
      * I session is valid tries to get request handler for request in request handler factory (see
      * {@link #requestHandlerFactory}).
-     * If found - uses it to process request, otherwise -
-     * calls
+     * If found - uses it to process request, otherwise - calls
      * {@link #onRequestHandlerNotFoundException(HttpServletRequest, HttpServletResponse, RequestHandlerNotFoundException)} method.
      * </p>
      * <p>It also calls set of methods before and after each action. Below is this list</p>
@@ -86,6 +82,8 @@ public abstract class AbstractController extends HttpServlet {
      * <li>{@link #preProcess(HttpServletRequest, HttpServletResponse)}</li>
      * <li>{@link #preValidation(HttpServletRequest, HttpServletResponse)}</li>
      * <li>{@link #postValidation(HttpServletRequest, HttpServletResponse)}</li>
+     * <li>{@link #preHandle(HttpServletRequest, HttpServletResponse, RequestHandler)}</li>
+     * <li>{@link #postHandle(HttpServletRequest, HttpServletResponse, RequestHandler)}</li>
      * <li>{@link #postProcess(HttpServletRequest, HttpServletResponse)}</li>
      * </ul>
      *
@@ -95,25 +93,55 @@ public abstract class AbstractController extends HttpServlet {
     protected void doGetPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         setNoCahce(response);
-        if (!preProcess(request, response)) {
-            return;
-        }
         try {
+            if (!preProcess(request, response)) {
+                return;
+            }
             if (!validateAndAuthorize(request, response)) {
                 return;
             }
-
             final RequestHandler handler = this.requestHandlerFactory.getRequestHandler(request);
-
+            if (!preHandle(request, response, handler)) {
+                return;
+            }
             handler.handle(request, response);
-        } catch (InvalidSessionException e) {
-            getLogger().error("Failed to process request due to invalid session", e);
-            onInvalidSessionException(request, response, e);
-        } catch (RequestHandlerNotFoundException e) {
-            getLogger().error("Failed to found request handler to process request", e);
-            onRequestHandlerNotFoundException(request, response, e);
+            postHandle(request, response, handler);
+            postProcess(request, response);
+        } catch (InvalidSessionException ex) {
+            getLogger().error("Failed to process request due to invalid session", ex);
+            onInvalidSessionException(request, response, ex);
+        } catch (RequestHandlerNotFoundException ex) {
+            getLogger().error("Failed to found request handler to process request", ex);
+            onRequestHandlerNotFoundException(request, response, ex);
+        } catch (Exception ex) {
+            getLogger().error("Failed to handle request", ex);
+            onException(request, response, ex);
         }
-        postProcess(request, response);
+    }
+
+    /**
+     * @see RequestInterceptor#preHandle(HttpServletRequest, HttpServletResponse, RequestHandler)
+     */
+    private boolean preHandle(HttpServletRequest request, HttpServletResponse response, RequestHandler handler)
+            throws Exception {
+        for (RequestInterceptor interceptor : this.requestHandlerFactory.getRequestInterceptors(request)) {
+            if (!interceptor.preHandle(request, response, handler)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @see RequestInterceptor#postHandle(HttpServletRequest, HttpServletResponse, RequestHandler)
+     */
+    private void postHandle(HttpServletRequest request, HttpServletResponse response, RequestHandler handler)
+            throws Exception {
+        RequestInterceptor[] interceptors
+                = this.requestHandlerFactory.getRequestInterceptors(request).toArray(new RequestInterceptor[0]);
+        for (int i = interceptors.length - 1; i >= 0; i--) {
+            interceptors[i].postHandle(request, response, handler);
+        }
     }
 
     private boolean validateAndAuthorize(HttpServletRequest request, HttpServletResponse response)
@@ -161,8 +189,6 @@ public abstract class AbstractController extends HttpServlet {
 
     /**
      * This method will be executed after each request processing.
-     *
-     * @return indicator if abstract controller should continue processing request. Default is true
      */
     protected void postProcess(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -226,5 +252,15 @@ public abstract class AbstractController extends HttpServlet {
      */
     protected abstract void onRequestHandlerNotFoundException(HttpServletRequest request, HttpServletResponse response,
             RequestHandlerNotFoundException e) throws ServletException, IOException;
+
+    /**
+     * <p>Invokes when controller or its interceptor encounters any exception.</p>
+     *
+     * @param ex - Exception that was thrown during looking for request handler
+     * @throws ServletException if some ServletException occurred during working with or response arguments
+     * @throws IOException if some IOException occurred during working with or response arguments
+     */
+    protected abstract void onException(HttpServletRequest request, HttpServletResponse response,
+            Exception ex) throws ServletException, IOException;
 
 }

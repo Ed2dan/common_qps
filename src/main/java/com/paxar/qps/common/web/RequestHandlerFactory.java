@@ -1,18 +1,18 @@
 package com.paxar.qps.common.web;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 /**
  * <p>This factory provides request handler implementation basing on action id parameter from request.</p>
  * <p>Also it provides default request handler if action id parameter was not found in request.</p>
- * @author rsav
- * @version 1.0
- *
  */
 public class RequestHandlerFactory {
 
@@ -27,6 +27,12 @@ public class RequestHandlerFactory {
      * <p>Contains action id as key, and corresponding request security instance as value.</p>
      */
     private Map<String, RequestAuthorizer> requestAuthorizers = new HashMap<>();
+
+    /**
+     * <p>Map with all interceptors that will be provided by factory.</p>
+     * <p>Contains action id as key, and corresponding request interceptor instance as value.</p>
+     */
+    private MultiValuedMap<String, RequestInterceptor> requestInterceptors = new ArrayListValuedHashMap<>();
 
     /**
      * <p>Default request handler that will be used if system tries to get request handler for empty action id.</p>
@@ -51,13 +57,25 @@ public class RequestHandlerFactory {
      * <p>
      *  Extracts action id parameter from request by key {@link QPSWebUtils#REQUEST_PARAMETER_ACTION_ID}
      *  and uses {@link #getRequestHandler(String)} with this value in order to found necessary request handler.
-     *  @param request
      *  @throws RequestHandlerNotFoundException if it was not found necessary implementation of request handler.
      * </p>
      */
     public RequestHandler getRequestHandler(HttpServletRequest request)
             throws RequestHandlerNotFoundException {
         return getRequestHandler(request.getParameter(QPSWebUtils.REQUEST_PARAMETER_ACTION_ID));
+    }
+
+    /**
+     * <p>Looks for {@link RequestInterceptor} implementations that might be used for handling specified request.</p>
+     * <p>
+     * Extracts action id parameter from request by key {@link QPSWebUtils#REQUEST_PARAMETER_ACTION_ID}
+     * and uses {@link #requestInterceptors} map to find necessary interceptors by the key.
+     * </p>
+     *
+     * @return empty collection if no result.
+     */
+    public Collection<RequestInterceptor> getRequestInterceptors(HttpServletRequest request) {
+        return requestInterceptors.get(request.getParameter(QPSWebUtils.REQUEST_PARAMETER_ACTION_ID));
     }
 
     /**
@@ -119,6 +137,22 @@ public class RequestHandlerFactory {
 
         this.requestHandlers.put(actionId, requestHandler);
         return new ValidationBinder(actionId);
+    }
+
+    /**
+     * <p>Puts request interceptor with specified action id to list of request handlers.</p>
+     * <p><strong>Note:</strong> multiple interceptors can be added for the same action ID.</p>
+     * @param actionId, not empty
+     * @param requestInterceptor, not null
+     * @return Current request handler factory instance
+     * @throws IllegalArgumentException if action id is empty, or request handler is null
+     */
+    public RequestHandlerFactory putRequestInterceptor(String actionId, RequestInterceptor requestInterceptor) {
+        Validate.notEmpty(actionId);
+        Validate.notNull(requestInterceptor);
+
+        this.requestInterceptors.put(actionId, requestInterceptor);
+        return this;
     }
 
     /**
@@ -211,7 +245,9 @@ public class RequestHandlerFactory {
         }
 
         /**
-         * <p>This method is not required to be called. It is just to have returning possibility to {@link RequestHandlerFactory} object without setting a {@link RequestAuthorizer}.</p>
+         * <p>This method is not required to be called.
+         * It is just to have returning possibility to {@link RequestHandlerFactory} object
+         * without setting a {@link RequestAuthorizer}.</p>
          */
         public RequestHandlerFactory finish() {
             return RequestHandlerFactory.this;

@@ -36,6 +36,13 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [request-interceptors]
+### Added
+- Added request interceptors as in Spring, that are executed in normal order before request and in reversed order after.
+Multiple interceptors can be added via RequestHandlerFactory.putRequestInterceptor with action ID as key.
+Each interceptor should implement RequestInterceptor interface.
+No way to override methods that handle them that's why e.g. existing AbstractController.postProcess was not reused (protected).
+
 ## [2.1.4-SNAPSHOT]
 ### Fixed
 - `AlphanumericComparator` was limited by `Integer` chunks comparison and threw `NumberFormatException` for the bigger ones.
