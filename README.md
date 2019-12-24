@@ -36,7 +36,12 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
-## [2.1.4] - 2019.08.30
+## [2.1.5] - 2019.12.24
+### Compatible versions and migration:
+- `averylib`: 0.0.6
+- `dbconnect`: 0.0.3
+
+## [2.1.4-SNAPSHOT]
 ### Fixed
 - `AlphanumericComparator` was limited by `Integer` chunks comparison and threw `NumberFormatException` for the bigger ones.
 Switched `Integer` to `BigInteger` which also changed performance (tested with shuffled string `123456789`):
