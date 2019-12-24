@@ -36,7 +36,7 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
-## [2.1.5-SNAPSHOT]
+## [2.1.5] - 2019.12.24
 ### Compatible versions and migration:
 - `averylib`: 0.0.6
 - `dbconnect`: 0.0.3
