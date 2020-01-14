@@ -1,5 +1,10 @@
 package com.paxar.qps.common.web;
 
+import com.paxar.qps.common.exception.InvalidSessionException;
+import com.paxar.qps.common.exception.RequestHandlerFactorySetupException;
+import com.paxar.qps.common.exception.RequestHandlerNotFoundException;
+import com.paxar.qps.common.exception.handler.InvalidSessionExceptionHandler;
+import com.paxar.qps.common.exception.handler.RequestHandlerNotFoundExceptionHandler;
 import java.io.IOException;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -40,20 +45,26 @@ import org.apache.log4j.Logger;
  */
 public abstract class AbstractController extends HttpServlet {
 
-    private static final long serialVersionUID = -906865592156025442L;
+    private static final long serialVersionUID = -6897160557762711931L;
 
     /**
      * Contains all request handlers that are supported by controller implementation.
      */
     private RequestHandlerFactory requestHandlerFactory = new RequestHandlerFactory();
 
+    /**
+     * Contains all exception handlers that are supported by controller implementation.
+     */
+    private ExceptionHandlerFactory exceptionHandlerFactory = new ExceptionHandlerFactory();
+
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         try {
             setupRequestHandlerFactory(this.requestHandlerFactory);
-        } catch (RequestHandlerFactorySetupException e) {
-            getLogger().error("Failed to setup request handler factory due to unexpected exception", e);
+            setupRequiredExceptionHandlerFactory(this.exceptionHandlerFactory);
+        } catch (RequestHandlerFactorySetupException ex) {
+            getLogger().error("Failed to setup request handler factory due to unexpected exception", ex);
             throw new ServletException(
                     "Failed to init controller due to unexpected exception during reuqest handler factory setup");
         }
@@ -94,10 +105,11 @@ public abstract class AbstractController extends HttpServlet {
      */
     protected void doGetPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        setNoCahce(response);
+        setNoCache(response);
         if (!preProcess(request, response)) {
             return;
         }
+
         try {
             if (!validateAndAuthorize(request, response)) {
                 return;
@@ -106,12 +118,8 @@ public abstract class AbstractController extends HttpServlet {
             final RequestHandler handler = this.requestHandlerFactory.getRequestHandler(request);
 
             handler.handle(request, response);
-        } catch (InvalidSessionException e) {
-            getLogger().error("Failed to process request due to invalid session", e);
-            onInvalidSessionException(request, response, e);
-        } catch (RequestHandlerNotFoundException e) {
-            getLogger().error("Failed to found request handler to process request", e);
-            onRequestHandlerNotFoundException(request, response, e);
+        } catch (Exception ex) {
+            handleException(ex, request, response);
         }
         postProcess(request, response);
     }
@@ -142,7 +150,7 @@ public abstract class AbstractController extends HttpServlet {
                         + actionId + "'. You can put DefaultAuthorizer there."));
     }
 
-    private void setNoCahce(HttpServletResponse response) {
+    private void setNoCache(HttpServletResponse response) {
         response.setHeader("X-UA-Compatible", "IE=edge");
         response.setHeader("Cache-Control", "no-cache");
         response.setHeader("Pragma", "no-cache");
@@ -188,17 +196,31 @@ public abstract class AbstractController extends HttpServlet {
         return true;
     }
 
+    protected void handleException(final Throwable ex, final HttpServletRequest request,
+            final HttpServletResponse response) {
+        try {
+            exceptionHandlerFactory.getExceptionHandler(ex, request).handle(ex, request, response);
+        } catch (final Throwable exp) {
+            handleException(exp, request, response);
+        }
+    }
+
     /**
-     * <p>Handles situation when session is not valid.</p>
-     * <p>Default method implementation forwards user to login page.</p>
-     *
-     * @param e - InvalidSessionException that was thrown
-     * @throws ServletException if some ServletException occurred during working with or response arguments
-     * @throws IOException if some ServletException occurred during working with or response arguments
+     * Setups exception handler factory that was transferred in argument with all necessary exception handlers.
      */
-    protected void onInvalidSessionException(HttpServletRequest request, HttpServletResponse response,
-            InvalidSessionException e) throws ServletException, IOException {
-        response.sendRedirect(QPSWebUtils.URL_LOGIN_PAGE);
+    protected final void setupRequiredExceptionHandlerFactory(final ExceptionHandlerFactory factory) {
+        factory.putDefaultExceptionHandler(getDefaultExceptionHandler());
+        factory.putExceptionHandler(InvalidSessionException.class, getInvalidSessionExceptionHandlerHandler());
+        factory.putExceptionHandler(RequestHandlerNotFoundException.class, getRequestHandlerNotFoundExceptionHandler());
+        setupExceptionHandlerFactory(factory);
+    }
+
+    protected ExceptionHandler<RequestHandlerNotFoundException> getRequestHandlerNotFoundExceptionHandler() {
+        return new RequestHandlerNotFoundExceptionHandler(getLogger());
+    }
+
+    protected ExceptionHandler<InvalidSessionException> getInvalidSessionExceptionHandlerHandler() {
+        return new InvalidSessionExceptionHandler(getLogger());
     }
 
     /**
@@ -217,14 +239,14 @@ public abstract class AbstractController extends HttpServlet {
             throws RequestHandlerFactorySetupException;
 
     /**
-     * <p>Invokes when controller can't find necessary request handler for processing request.</p>
-     * <p><strong>Note:</strong> abstract controller already logged RequestHandlerNotFoundException exception.</p>
-     *
-     * @param e - RequestHandlerNotFoundException that was thrown during looking for request handler
-     * @throws ServletException if some ServletException occurred during working with or response arguments
-     * @throws IOException if some IOException occurred during working with or response arguments
+     * Setups exception handler factory that was transferred in argument with all necessary exception handlers.
      */
-    protected abstract void onRequestHandlerNotFoundException(HttpServletRequest request, HttpServletResponse response,
-            RequestHandlerNotFoundException e) throws ServletException, IOException;
+    protected abstract void setupExceptionHandlerFactory(ExceptionHandlerFactory factory);
 
+    /**
+     * Returns {@link ExceptionHandler} instance that will be used as default.
+     *
+     * @return ExceptionHandler<Throwable> instance
+     */
+    protected abstract ExceptionHandler<Throwable> getDefaultExceptionHandler();
 }

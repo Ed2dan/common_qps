@@ -36,6 +36,38 @@ Guiding Principles:
 
 ## [Unreleased] - yyy.mm.dd
 
+## [2.2.0-feature-exception-handlers-SNAPSHOT]
+ ###Added
+  - `ExceptionHandler` - Handler of any `Throwable` that might be thrown while a `RequestHandler` works.
+  - `ExceptionHandlerFactory` for `ExceptionHandler`.
+  You might add new `ExceptionHandler` with almost the same logic as you do with `RequestHandler`s.
+  E.g. you have `NoOrderFoundException` and you want to handle that. In your `AbstractController.setupExceptionHandlerFactory()`:
+```java
+//...
+factory.putExceptionHandler(NoOrderFoundException.class, getNoOrderFoundExceptionHandler());
+//...
+```
+  Another e.g.: the same situation but you'd like to have different handling for `actionId=a1`:
+```java
+//...
+factory.putExceptionHandler(NoOrderFoundException.class, getNoOrderFoundExceptionHandler())
+                    .putActionExceptionHandler("a1", getNoOrderFoundExceptionHandlerA1())
+                .done()
+                .putExceptionHandler(IOException.class, getIOExceptionHandler());;
+//...
+```
+  - `AbstractController.handleException()` - it is recursive so if one of your `ExceptionHandler`s will throw an Exception, another one would handle that.
+  - `AbstractController.getRequestHandlerNotFoundExceptionHandler()`.
+  - `AbstractController.getInvalidSessionExceptionHandlerHandler()`.
+  - `abstract AbstractController.setupExceptionHandlerFactory()`.
+  - `abstract AbstractController.getDefaultExceptionHandler()`.
+ ###Removed
+  - `onInvalidSessionException()` and `onRequestHandlerNotFoundException()` from `AbstractController`.
+ ###Changed
+  - Moved `InvalidSessionException`, `RequestHandlerFactorySetupException` and `RequesthandlerNotFoundException` to `com.paxar.qps.common.exception` package.
+ ###Compatible versions and migration
+  - If you have overridden `AbstractController.onInvalidSessionException()` or `AbstractController.onRequestHandlerNotFoundException()`, overwrite it to `ExceptionHandler` logic.
+
 ## [2.1.5] - 2019.12.24
 ### Compatible versions and migration:
 - `averylib`: 0.0.6

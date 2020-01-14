@@ -1,11 +1,10 @@
 package com.paxar.qps.common.web;
 
+import com.paxar.qps.common.exception.InvalidSessionException;
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-
 import org.apache.commons.lang.Validate;
 
 /**
