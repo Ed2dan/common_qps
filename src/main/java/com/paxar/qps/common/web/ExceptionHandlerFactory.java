@@ -114,13 +114,13 @@ public class ExceptionHandlerFactory {
             return null;
         }
 
-        Class<? extends Throwable> exClass;
+        Class<?> exClass = ex.getClass();
 
-        while (!Throwable.class.equals((exClass = ex.getClass()))) {
+        do {
             if (exceptionHandlers.containsKey(exClass)) {
                 return exceptionHandlers.get(exClass);
             }
-        }
+        } while (!Object.class.equals((exClass = exClass.getSuperclass())));
         return null;
     }
 
