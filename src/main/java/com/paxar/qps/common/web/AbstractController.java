@@ -201,7 +201,11 @@ public abstract class AbstractController extends HttpServlet {
         try {
             exceptionHandlerFactory.getExceptionHandler(ex, request).handle(ex, request, response);
         } catch (final Throwable exp) {
-            handleException(exp, request, response);
+            try {
+                getDefaultExceptionHandler().handle(exp, request, response);
+            } catch (final Exception exp1) {
+                getLogger().error(exp1);
+            }
         }
     }
 

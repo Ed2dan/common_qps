@@ -65,6 +65,7 @@ factory.putExceptionHandler(NoOrderFoundException.class, getNoOrderFoundExceptio
   - `onInvalidSessionException()` and `onRequestHandlerNotFoundException()` from `AbstractController`.
  ###Changed
   - Moved `InvalidSessionException`, `RequestHandlerFactorySetupException` and `RequesthandlerNotFoundException` to `com.paxar.qps.common.exception` package.
+  - `RequestHandler.handle() throws IOException, ServletException` -> `RequestHandler.handle() throws Exception`.
  ###Compatible versions and migration
   - If you have overridden `AbstractController.onInvalidSessionException()` or `AbstractController.onRequestHandlerNotFoundException()`, overwrite it to `ExceptionHandler` logic.
 

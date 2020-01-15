@@ -2,7 +2,6 @@ package com.paxar.qps.common.web;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -22,8 +21,10 @@ public interface RequestHandler {
      *  <strong>Note: </strong>
      *  All implementations of this method should throw ServletException and IOException only in case, 
      *  when it was caused by using request or response arguments 
-     *  (like {@link HttpServletResponse#sendRedirect(String)}, {@link RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}, etc.).
-     *  In all other cases (if, for example, {@link FileNotFoundException} was thrown during executing some business logic that is not associated with request and response directly),
+     *  (like {@link HttpServletResponse#sendRedirect(String)},
+     *  {@link RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)}, etc.).
+     *  In all other cases (if, for example, {@link FileNotFoundException} was thrown during executing some business
+     *  logic that is not associated with request and response directly),
      *  these exceptions should be handled by handle method implementation.
      * </p>
      * @param request
@@ -31,7 +32,7 @@ public interface RequestHandler {
      * @throws ServletException if some exception occurred during working with request or response argument 
      * @throws IOException if some exception occurred during working with request or response argument
      */
-    public void handle(HttpServletRequest request, HttpServletResponse response) 
-            throws ServletException, IOException;
+    public void handle(HttpServletRequest request, HttpServletResponse response)
+            throws Exception;
 
 }
